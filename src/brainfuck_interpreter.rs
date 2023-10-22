@@ -12,39 +12,35 @@ pub(crate) struct BrainfuckInterpreter {
 
 impl BrainfuckInterpreter {
     pub(crate) fn run(&mut self) -> Result<(), ()> {
-        loop {
-            if let Some(command) = self.commands.get(self.ip) {
-                match command {
-                    Command::IncrementDP => self.memory.increment_dp(),
-                    Command::DecrementDP => self.memory.decrement_dp(),
-                    Command::IncrementMem => self.memory.increment(),
-                    Command::DecrementMem => self.memory.decrement(),
-                    Command::Input => {
-                        let char = std::io::stdin().bytes().next().ok_or(())?.or(Err(()))?;
-                        self.memory.set_value(char as i32);
-                    }
-                    Command::Output => {
-                        let a = self.memory.value();
-                        print!("{}", a as u8 as char);
-                    }
-                    Command::JmpNext => {
-                        if self.memory.value() == 0 {
-                            let next_ip = self.next_matching_bracket().ok_or(())?;
-                            self.ip = next_ip;
-                        }
-                    }
-                    Command::JmpPrev => {
-                        if self.memory.value() != 0 {
-                            let next_ip = self.previous_matching_bracket().ok_or(())?;
-                            self.ip = next_ip;
-                        }
+        while let Some(command) = self.commands.get(self.ip) {
+            match command {
+                Command::IncrementDP => self.memory.increment_dp(),
+                Command::DecrementDP => self.memory.decrement_dp(),
+                Command::IncrementMem => self.memory.increment(),
+                Command::DecrementMem => self.memory.decrement(),
+                Command::Input => {
+                    let char = std::io::stdin().bytes().next().ok_or(())?.or(Err(()))?;
+                    self.memory.set_value(char as i32);
+                }
+                Command::Output => {
+                    let a = self.memory.value();
+                    print!("{}", a as u8 as char);
+                }
+                Command::JmpNext => {
+                    if self.memory.value() == 0 {
+                        let next_ip = self.next_matching_bracket().ok_or(())?;
+                        self.ip = next_ip;
                     }
                 }
-
-                self.ip += 1;
-            } else {
-                break;
+                Command::JmpPrev => {
+                    if self.memory.value() != 0 {
+                        let next_ip = self.previous_matching_bracket().ok_or(())?;
+                        self.ip = next_ip;
+                    }
+                }
             }
+
+            self.ip += 1;
         }
 
         Ok(())
@@ -91,7 +87,7 @@ impl FromStr for BrainfuckInterpreter {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s = s.trim().replace("\n", "").replace("\r", "").replace(" ", "");
+        let s = s.trim().replace(['\n', '\r', ' '], "");
         let commands = s
             .chars()
             .map(Command::from_char)

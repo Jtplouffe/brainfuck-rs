@@ -1,13 +1,13 @@
-pub(crate) struct Memory {
+pub(crate) struct Memory<const N: usize = 30000> {
     dp: usize,
-    data: Vec<i32>,
+    data: [i32; N],
 }
 
-impl Memory {
+impl<const N: usize> Memory<N> {
     pub(crate) fn new() -> Self {
         Memory {
             dp: 0,
-            data: vec![0; 30000],
+            data: [0; N],
         }
     }
 
